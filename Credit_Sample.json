@@ -1,0 +1,318 @@
+{
+  "environment": "sandbox",
+  "language": "pt",
+  "activeScenario": "current",
+  "worst": [
+    {
+      "name": "Clientes full externo",
+      "usageType": "externalBatch",
+      "mode": "full",
+      "volume": 40,
+      "runs": 20
+    },
+    {
+      "name": "Delta diário externo",
+      "usageType": "externalBatch",
+      "mode": "delta",
+      "volume": 2,
+      "runs": 30
+    },
+    {
+      "name": "Transform principal",
+      "usageType": "transformBatch",
+      "mode": "delta",
+      "volume": 55,
+      "runs": 30
+    },
+    {
+      "name": "Calculated Insights batch",
+      "usageType": "calcInsightsBatch",
+      "mode": "delta",
+      "volume": 110,
+      "runs": 8
+    },
+    {
+      "name": "Query API serving",
+      "usageType": "dataQueries",
+      "mode": "delta",
+      "volume": 1200,
+      "runs": 1
+    },
+    {
+      "name": "Segmentação intensiva",
+      "usageType": "segmentRows",
+      "mode": "delta",
+      "volume": 300,
+      "runs": 1
+    }
+  ],
+  "current": [
+    {
+      "name": "Clientes full externo",
+      "usageType": "externalBatch",
+      "mode": "full",
+      "volume": 25,
+      "runs": 12
+    },
+    {
+      "name": "Delta diário externo",
+      "usageType": "externalBatch",
+      "mode": "delta",
+      "volume": 1.2,
+      "runs": 30
+    },
+    {
+      "name": "Transform principal",
+      "usageType": "transformBatch",
+      "mode": "delta",
+      "volume": 42,
+      "runs": 30
+    },
+    {
+      "name": "Calculated Insights batch",
+      "usageType": "calcInsightsBatch",
+      "mode": "delta",
+      "volume": 30,
+      "runs": 6
+    },
+    {
+      "name": "Query API serving",
+      "usageType": "dataQueries",
+      "mode": "delta",
+      "volume": 320,
+      "runs": 1
+    },
+    {
+      "name": "Segmentação corrente",
+      "usageType": "segmentRows",
+      "mode": "delta",
+      "volume": 96,
+      "runs": 1
+    }
+  ],
+  "target": [
+    {
+      "name": "Full refresh controlado",
+      "usageType": "externalBatch",
+      "mode": "full",
+      "volume": 5,
+      "runs": 4
+    },
+    {
+      "name": "Delta diário otimizado",
+      "usageType": "externalBatch",
+      "mode": "delta",
+      "volume": 1.4,
+      "runs": 30
+    },
+    {
+      "name": "Transform reduzido",
+      "usageType": "transformBatch",
+      "mode": "delta",
+      "volume": 18,
+      "runs": 30
+    },
+    {
+      "name": "Calculated Insights afinado",
+      "usageType": "calcInsightsBatch",
+      "mode": "delta",
+      "volume": 12,
+      "runs": 4
+    },
+    {
+      "name": "Query API otimizada",
+      "usageType": "dataQueries",
+      "mode": "delta",
+      "volume": 180,
+      "runs": 1
+    },
+    {
+      "name": "Segmentação otimizada",
+      "usageType": "segmentRows",
+      "mode": "delta",
+      "volume": 72,
+      "runs": 1
+    }
+  ],
+  "usageTypes": [
+    {
+      "key": "internalBatch",
+      "label": "Internal Data Pipeline - Batch",
+      "aliases": [
+        "internal data pipeline - batch",
+        "internal data pipeline batch"
+      ],
+      "unit": "1M rows processed",
+      "rates": {
+        "production": 0,
+        "sandbox": 0
+      }
+    },
+    {
+      "key": "internalStreaming",
+      "label": "Internal Data Pipeline - Streaming",
+      "aliases": [
+        "internal data pipeline - streaming",
+        "internal data pipeline streaming"
+      ],
+      "unit": "1M rows processed",
+      "rates": {
+        "production": 0,
+        "sandbox": 0
+      }
+    },
+    {
+      "key": "externalBatch",
+      "label": "External Data Pipeline - Batch",
+      "aliases": [
+        "external data pipeline - batch",
+        "external data pipeline batch"
+      ],
+      "unit": "1M rows processed",
+      "rates": {
+        "production": 2000,
+        "sandbox": 1600
+      }
+    },
+    {
+      "key": "externalStreaming",
+      "label": "External Data Pipeline - Streaming",
+      "aliases": [
+        "external data pipeline - streaming",
+        "external data pipeline streaming"
+      ],
+      "unit": "1M rows processed",
+      "rates": {
+        "production": 5000,
+        "sandbox": 4000
+      }
+    },
+    {
+      "key": "transformBatch",
+      "label": "Data Transforms - Batch",
+      "aliases": [
+        "data transforms - batch",
+        "data transforms batch"
+      ],
+      "unit": "1M rows processed",
+      "rates": {
+        "production": 400,
+        "sandbox": 320
+      }
+    },
+    {
+      "key": "transformStreaming",
+      "label": "Data Transforms - Streaming",
+      "aliases": [
+        "data transforms - streaming",
+        "data transforms streaming"
+      ],
+      "unit": "1M rows processed",
+      "rates": {
+        "production": 5000,
+        "sandbox": 4000
+      }
+    },
+    {
+      "key": "calcInsightsBatch",
+      "label": "Calculated Insights - Batch",
+      "aliases": [
+        "calculated insights - batch",
+        "calculated insights batch"
+      ],
+      "unit": "1M rows processed",
+      "rates": {
+        "production": 15,
+        "sandbox": 12
+      }
+    },
+    {
+      "key": "calcInsightsStreaming",
+      "label": "Calculated Insights - Streaming",
+      "aliases": [
+        "calculated insights - streaming",
+        "calculated insights streaming"
+      ],
+      "unit": "1M rows processed",
+      "rates": {
+        "production": 800,
+        "sandbox": 640
+      }
+    },
+    {
+      "key": "dataQueries",
+      "label": "Data Queries",
+      "aliases": [
+        "data queries"
+      ],
+      "unit": "1M rows processed",
+      "rates": {
+        "production": 2,
+        "sandbox": 1.6
+      }
+    },
+    {
+      "key": "segmentRows",
+      "label": "Segment Rows Processed",
+      "aliases": [
+        "segment rows processed",
+        "segment rows"
+      ],
+      "unit": "1M rows processed",
+      "rates": {
+        "production": 20,
+        "sandbox": 16
+      }
+    },
+    {
+      "key": "batchActivation",
+      "label": "Batch Activation",
+      "aliases": [
+        "batch activation"
+      ],
+      "unit": "1M rows processed",
+      "rates": {
+        "production": 10,
+        "sandbox": 8
+      }
+    },
+    {
+      "key": "activateDmoStreaming",
+      "label": "Activate DMO - Streaming",
+      "aliases": [
+        "activate dmo - streaming",
+        "activate dmo streaming"
+      ],
+      "unit": "1M rows processed",
+      "rates": {
+        "production": 1600,
+        "sandbox": 1280
+      }
+    },
+    {
+      "key": "streamingActions",
+      "label": "Streaming Actions (incl. lookups)",
+      "aliases": [
+        "streaming actions",
+        "streaming actions incl lookups"
+      ],
+      "unit": "1M rows processed",
+      "rates": {
+        "production": 800,
+        "sandbox": 640
+      }
+    },
+    {
+      "key": "profileUnification",
+      "label": "Profile Unification",
+      "aliases": [
+        "profile unification"
+      ],
+      "unit": "1M rows processed",
+      "rates": {
+        "production": 100000,
+        "sandbox": 80000
+      }
+    }
+  ]
+}

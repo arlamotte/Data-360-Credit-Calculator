@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Cloud Credit Calculator - Recurring Loads (PDF URL)</title>
+  <style>
+    :root {
+      --bg: #f3f6f9;
+      --panel: #ffffff;
+      --line: #d8dde6;
+      --line-strong: #c9cfd8;
+      --text: #16325c;
+      --muted: #54698d;
+      --accent: #0176d3;
+      --accent-dark: #014486;
+      --accent-soft: #eef4ff;
+      --good: #2e844a;
+      --warn: #8c4b02;
+      --bad: #ba0517;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background:
+        radial-gradient(circle at top right, rgba(1, 118, 211, 0.08), transparent 28%),
+        linear-gradient(180deg, #f8fbff 0%, #f3f6f9 100%);
+      color: var(--text);
+      font-family: "Salesforce Sans", "Segoe UI", Arial, sans-serif;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    .page {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      display: grid;
+      gap: 12px;
+      border-top: 4px solid var(--accent);
+    }
+
+    .hero p,
+    .muted,
+    .small {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .small { font-size: 12px; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.1fr 1.9fr;
+      gap: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .scenario-workspace {
+      display: grid;
+      gap: 16px;
+    }
+
+    .scenario-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .scenario-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .scenario-tab:hover {
+      background: #f7f9fb;
+    }
+
+    .scenario-tab.active {
+      background: var(--accent-soft);
+      border-color: #8bb8f2;
+      color: #032d60;
+      box-shadow: inset 0 0 0 1px rgba(1, 118, 211, 0.14);
+    }
+
+    .scenario-tab-bullet {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--line-strong);
+      flex: 0 0 auto;
+    }
+
+    .scenario-tab[data-scenario="worst"] .scenario-tab-bullet {
+      background: var(--bad);
+    }
+
+    .scenario-tab[data-scenario="current"] .scenario-tab-bullet {
+      background: var(--warn);
+    }
+
+    .scenario-tab[data-scenario="target"] .scenario-tab-bullet {
+      background: var(--good);
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eef1f6;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+
+    input, select, textarea, button {
+      font: inherit;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      color: var(--text);
+      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.03);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    button {
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+    }
+
+    button:hover {
+      background: #f7f9fb;
+      border-color: #b9c3cf;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    button.primary:hover {
+      background: var(--accent-dark);
+      border-color: var(--accent-dark);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, #ffffff 0%, #fafbfd 100%);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      display: grid;
+      gap: 6px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .card.kpi {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card.kpi::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--accent);
+    }
+
+    .card.kpi.worst::before { background: var(--bad); }
+    .card.kpi.current::before { background: var(--warn); }
+    .card.kpi.target::before { background: var(--good); }
+    .card.kpi.delta::before { background: var(--accent); }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .summary-grid + .summary-grid {
+      margin-top: 12px;
+    }
+
+    .summary-card {
+      min-height: 108px;
+    }
+
+    .summary-card .subnote {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .card .label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .card .value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #032d60;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    th, td {
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      background: #f8fafc;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tbody tr:hover {
+      background: #f8fbff;
+    }
+
+    .scenario-panel {
+      display: grid;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .scenario-panel.hidden {
+      display: none;
+    }
+
+    .scenario-header-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+    }
+
+    .pill.worst {
+      background: rgba(186, 5, 23, 0.08);
+      color: var(--bad);
+      border-color: rgba(186, 5, 23, 0.18);
+    }
+
+    .pill.current {
+      background: rgba(140, 75, 2, 0.10);
+      color: var(--warn);
+      border-color: rgba(140, 75, 2, 0.16);
+    }
+
+    .pill.target {
+      background: rgba(46, 132, 74, 0.10);
+      color: var(--good);
+      border-color: rgba(46, 132, 74, 0.18);
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .scenario-table td input,
+    .scenario-table td select {
+      min-width: 120px;
+    }
+
+    .scenario-table td.number {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 74px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge.good { background: rgba(52, 211, 153, 0.14); color: var(--good); }
+    .badge.warn { background: rgba(255, 183, 93, 0.18); color: var(--warn); }
+    .badge.bad { background: rgba(234, 0, 30, 0.12); color: var(--bad); }
+
+    .hero h1, .panel h2, .panel h3 {
+      color: #032d60;
+    }
+
+    .delta-positive { color: var(--bad); font-weight: 700; }
+    .delta-negative { color: var(--good); font-weight: 700; }
+    .delta-neutral { color: var(--muted); font-weight: 700; }
+
+    .status {
+      border-radius: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: #f8fafc;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status.ok {
+      background: rgba(46, 132, 74, 0.08);
+      border-color: rgba(46, 132, 74, 0.26);
+      color: #1d6b39;
+    }
+
+    .status.error {
+      background: rgba(186, 5, 23, 0.08);
+      border-color: rgba(186, 5, 23, 0.24);
+      color: #8a1220;
+    }
+
+    @media (max-width: 1280px) {
+      .grid-2,
+      .grid-3,
+      .cards,
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="panel hero">
+      <h1 id="heroTitle">Calculadora de créditos de Data Cloud — cargas recorrentes</h1>
+      <p id="heroDescription">
+        Versão com ingestão automática da tabela de preços por <strong>URL de PDF</strong> da Salesforce.
+        O parser tenta identificar os valores de <strong>Production</strong> e <strong>Sandbox</strong>
+        para os usage types do modelo.
+      </p>
+      <p class="small" id="heroNote">
+        Observação: se o servidor remoto bloquear CORS, o navegador pode impedir a leitura direta do PDF.
+      </p>
+    </section>
+
+    <section class="panel">
+      <div class="section-title">
+        <div>
+          <h2 id="pdfSourceTitle">Fonte de rate card via PDF</h2>
+          <p class="muted" id="pdfSourceDescription">Cole a URL pública do PDF de usage types da Salesforce e clique em carregar.</p>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom: 12px;">
+        <label for="language" id="languageLabel">Idioma</label>
+        <select id="language">
+          <option value="pt">Português</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom: 12px;">
+        <label for="pdfUrl" id="pdfUrlLabel">URL do PDF</label>
+        <input
+          id="pdfUrl"
+          type="url"
+          placeholder="https://.../New-Nov25-DataCloud-PlatformServices.pdf"
+          value="https://www.salesforce.com/en-us/wp-content/uploads/sites/4/documents/platform/New-Nov25-DataCloud-PlatformServices.pdf"
+        />
+      </div>
+      <div class="actions">
+        <button class="primary" id="loadPdfBtn">Carregar rates da URL</button>
+        <button id="resetRatesBtn">Restaurar rates padrão</button>
+      </div>
+      <div class="status" id="pdfStatus" style="margin-top: 12px;">
+        Aguardando carregamento do PDF.
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="section-title">
+          <div>
+            <h2 id="rateCardTitle">Rate card</h2>
+            <p class="muted" id="rateCardDescription">Selecione o ambiente para aplicar Production ou Sandbox.</p>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom: 14px;">
+          <label for="environment" id="environmentLabel">Entorno</label>
+          <select id="environment">
+            <option value="sandbox" selected id="environmentOptionSandbox">Sandbox</option>
+            <option value="production" id="environmentOptionProduction">Production</option>
+          </select>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th id="rateHeaderUsageType">Usage type</th>
+              <th id="rateHeaderUnit">Unidade</th>
+              <th id="rateHeaderProduction">Production</th>
+              <th id="rateHeaderSandbox">Sandbox</th>
+            </tr>
+          </thead>
+          <tbody id="rateCardBody"></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="section-title">
+          <div>
+            <h2 id="summaryTitle">Resumo comparativo</h2>
+            <p class="muted" id="summaryDescription">Totais mensais e anuais por cenário.</p>
+          </div>
+        </div>
+        <div class="summary-grid">
+          <div class="card kpi worst summary-card">
+            <div class="label">Worst mensal</div>
+            <div class="value" id="worstTotal">0.00</div>
+            <div class="subnote">Cenário de maior pressão estimada.</div>
+          </div>
+          <div class="card kpi current summary-card">
+            <div class="label">Atual mensal</div>
+            <div class="value" id="currentTotal">0.00</div>
+            <div class="subnote">Baseline operacional de referência.</div>
+          </div>
+          <div class="card kpi target summary-card">
+            <div class="label">Target mensal</div>
+            <div class="value" id="targetTotal">0.00</div>
+            <div class="subnote">Cenário objetivo otimizado.</div>
+          </div>
+        </div>
+        <div class="summary-grid">
+          <div class="card kpi worst summary-card">
+            <div class="label">Worst anual</div>
+            <div class="value" id="worstYear">0.00</div>
+            <div class="subnote">Projeção anual do worst case.</div>
+          </div>
+          <div class="card kpi current summary-card">
+            <div class="label">Atual anual</div>
+            <div class="value" id="currentYear">0.00</div>
+            <div class="subnote">Projeção anual do baseline.</div>
+          </div>
+          <div class="card kpi target summary-card">
+            <div class="label">Target anual</div>
+            <div class="value" id="targetYear">0.00</div>
+            <div class="subnote">Projeção anual do target.</div>
+          </div>
+        </div>
+        <div class="summary-grid">
+          <div class="card kpi delta summary-card">
+            <div class="label">Economia mensal vs atual</div>
+            <div class="value" id="deltaVsCurrent">0.00</div>
+            <div class="subnote">Target comparado contra o baseline atual.</div>
+          </div>
+          <div class="card kpi delta summary-card">
+            <div class="label">Economia mensal vs worst</div>
+            <div class="value" id="deltaVsWorst">0.00</div>
+            <div class="subnote">Target comparado contra o teto de risco.</div>
+          </div>
+          <div class="card kpi delta summary-card">
+            <div class="label">Ratio target / atual</div>
+            <div class="value" id="ratioTargetCurrent">0.00x</div>
+            <div class="subnote">Quanto representa o target frente ao atual.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-title">
+        <div>
+          <h2 id="scenariosTitle">Cenários de cargas recorrentes</h2>
+          <p class="muted" id="scenariosDescription">Cada linha representa uma carga recorrente mensal.</p>
+        </div>
+      </div>
+      <div class="scenario-workspace">
+        <div class="scenario-tabs" id="scenarioTabs"></div>
+        <div class="scenario-panel" id="scenarioWorst"></div>
+        <div class="scenario-panel" id="scenarioCurrent"></div>
+        <div class="scenario-panel" id="scenarioTarget"></div>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="section-title">
+          <div>
+            <h2 id="detailTitle">Detalhe por usage type</h2>
+            <p class="muted" id="detailDescription">Custo consolidado por tipo de uso em cada cenário.</p>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th id="detailHeaderUsageType">Usage type</th>
+              <th id="detailHeaderWorst">Worst</th>
+              <th id="detailHeaderCurrent">Atual</th>
+              <th id="detailHeaderTarget">Target</th>
+              <th id="detailHeaderDelta">Delta vs atual</th>
+            </tr>
+          </thead>
+          <tbody id="breakdownBody"></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="section-title">
+          <div>
+            <h2 id="diagnosisTitle">Diagnóstico</h2>
+            <p class="muted" id="diagnosisDescription">Leitura rápida do mix full/delta e drivers de custo.</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="card">
+            <div class="label" id="riskWorstLabel">Risco worst</div>
+            <div id="worstRisk"></div>
+          </div>
+          <div class="card">
+            <div class="label" id="riskCurrentLabel">Risco atual</div>
+            <div id="currentRisk"></div>
+          </div>
+          <div class="card">
+            <div class="label" id="riskTargetLabel">Risco target</div>
+            <div id="targetRisk"></div>
+          </div>
+        </div>
+        <div class="small" style="margin-top: 14px;">
+          <ul id="recommendations"></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-title">
+        <div>
+          <h2 id="exportTitle">Exportar / importar</h2>
+          <p class="muted" id="exportDescription">Guarde premissas de cenários como JSON.</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="exportBtn">Exportar JSON</button>
+        <button id="loadExampleBtn">Carregar exemplo alto</button>
+        <button id="loadOptimizedBtn">Carregar exemplo otimizado</button>
+      </div>
+      <div class="field" style="margin-top: 14px;">
+        <label for="jsonBox" id="jsonLabel">JSON</label>
+        <textarea id="jsonBox" spellcheck="false"></textarea>
+      </div>
+      <div class="actions">
+        <button id="importBtn">Importar JSON</button>
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.min.mjs";
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.mjs";
+
+    const baseUsageTypes = [
+      {
+        key: "internalBatch",
+        label: "Internal Data Pipeline - Batch",
+        aliases: ["internal data pipeline - batch", "internal data pipeline batch"],
+        unit: "1M rows processed",
+        rates: { production: 0, sandbox: 0 }
+      },
+      {
+        key: "internalStreaming",
+        label: "Internal Data Pipeline - Streaming",
+        aliases: ["internal data pipeline - streaming", "internal data pipeline streaming"],
+        unit: "1M rows processed",
+        rates: { production: 0, sandbox: 0 }
+      },
+      {
+        key: "externalBatch",
+        label: "External Data Pipeline - Batch",
+        aliases: ["external data pipeline - batch", "external data pipeline batch"],
+        unit: "1M rows processed",
+        rates: { production: 2000, sandbox: 1600 }
+      },
+      {
+        key: "externalStreaming",
+        label: "External Data Pipeline - Streaming",
+        aliases: ["external data pipeline - streaming", "external data pipeline streaming"],
+        unit: "1M rows processed",
+        rates: { production: 5000, sandbox: 4000 }
+      },
+      {
+        key: "transformBatch",
+        label: "Data Transforms - Batch",
+        aliases: ["data transforms - batch", "data transforms batch"],
+        unit: "1M rows processed",
+        rates: { production: 400, sandbox: 320 }
+      },
+      {
+        key: "transformStreaming",
+        label: "Data Transforms - Streaming",
+        aliases: ["data transforms - streaming", "data transforms streaming"],
+        unit: "1M rows processed",
+        rates: { production: 5000, sandbox: 4000 }
+      },
+      {
+        key: "calcInsightsBatch",
+        label: "Calculated Insights - Batch",
+        aliases: ["calculated insights - batch", "calculated insights batch"],
+        unit: "1M rows processed",
+        rates: { production: 15, sandbox: 12 }
+      },
+      {
+        key: "calcInsightsStreaming",
+        label: "Calculated Insights - Streaming",
+        aliases: ["calculated insights - streaming", "calculated insights streaming"],
+        unit: "1M rows processed",
+        rates: { production: 800, sandbox: 640 }
+      },
+      {
+        key: "dataQueries",
+        label: "Data Queries",
+        aliases: ["data queries"],
+        unit: "1M rows processed",
+        rates: { production: 2, sandbox: 1.6 }
+      },
+      {
+        key: "segmentRows",
+        label: "Segment Rows Processed",
+        aliases: ["segment rows processed", "segment rows"],
+        unit: "1M rows processed",
+        rates: { production: 20, sandbox: 16 }
+      },
+      {
+        key: "batchActivation",
+        label: "Batch Activation",
+        aliases: ["batch activation"],
+        unit: "1M rows processed",
+        rates: { production: 10, sandbox: 8 }
+      },
+      {
+        key: "activateDmoStreaming",
+        label: "Activate DMO - Streaming",
+        aliases: ["activate dmo - streaming", "activate dmo streaming"],
+        unit: "1M rows processed",
+        rates: { production: 1600, sandbox: 1280 }
+      },
+      {
+        key: "streamingActions",
+        label: "Streaming Actions (incl. lookups)",
+        aliases: ["streaming actions", "streaming actions incl lookups"],
+        unit: "1M rows processed",
+        rates: { production: 800, sandbox: 640 }
+      },
+      {
+        key: "profileUnification",
+        label: "Profile Unification",
+        aliases: ["profile unification"],
+        unit: "1M rows processed",
+        rates: { production: 100000, sandbox: 80000 }
+      }
+    ];
+
+    let usageTypes = JSON.parse(JSON.stringify(baseUsageTypes));
+
+    const scenarioOrder = [
+      { key: "worst", containerId: "scenarioWorst", titleKey: "scenarioWorst" },
+      { key: "current", containerId: "scenarioCurrent", titleKey: "scenarioCurrent" },
+      { key: "target", containerId: "scenarioTarget", titleKey: "scenarioTarget" }
+    ];
+
+    const i18n = {
+      pt: {
+        pageTitle: "Data Cloud Credit Calculator - Recurring Loads (PDF URL)",
+        heroTitle: "Calculadora de créditos de Data Cloud — cargas recorrentes",
+        heroDescription: "Versão com ingestão automática da tabela de preços por <strong>URL de PDF</strong> da Salesforce. O parser tenta identificar os valores de <strong>Production</strong> e <strong>Sandbox</strong> para os usage types do modelo.",
+        heroNote: "Observação: se o servidor remoto bloquear CORS, o navegador pode impedir a leitura direta do PDF.",
+        pdfSourceTitle: "Fonte de rate card via PDF",
+        pdfSourceDescription: "Cole a URL pública do PDF de usage types da Salesforce e clique em carregar.",
+        languageLabel: "Idioma",
+        pdfUrlLabel: "URL do PDF",
+        pdfUrlPlaceholder: "https://.../New-Nov25-DataCloud-PlatformServices.pdf",
+        loadPdfBtn: "Carregar rates da URL",
+        resetRatesBtn: "Restaurar rates padrão",
+        initialStatus: "Aguardando carregamento do PDF.",
+        rateCardTitle: "Rate card",
+        rateCardDescription: "Selecione o ambiente para aplicar Production ou Sandbox.",
+        environmentLabel: "Entorno",
+        sandbox: "Sandbox",
+        production: "Production",
+        usageType: "Usage type",
+        unit: "Unidade",
+        summaryTitle: "Resumo comparativo",
+        summaryDescription: "Totais mensais e anuais por cenário.",
+        scenariosTitle: "Cenários de cargas recorrentes",
+        scenariosDescription: "Cada linha representa uma carga recorrente mensal.",
+        detailTitle: "Detalhe por usage type",
+        detailDescription: "Custo consolidado por tipo de uso em cada cenário.",
+        detailDelta: "Delta vs atual",
+        diagnosisTitle: "Diagnóstico",
+        diagnosisDescription: "Leitura rápida do mix full/delta e drivers de custo.",
+        riskWorstLabel: "Risco worst",
+        riskCurrentLabel: "Risco atual",
+        riskTargetLabel: "Risco target",
+        exportTitle: "Exportar / importar",
+        exportDescription: "Guarde premissas de cenários como JSON.",
+        exportBtn: "Exportar JSON",
+        loadExampleBtn: "Carregar exemplo alto",
+        loadOptimizedBtn: "Carregar exemplo otimizado",
+        importBtn: "Importar JSON",
+        scenarioWorst: "Worst case",
+        scenarioCurrent: "Atual",
+        scenarioTarget: "Target",
+        loads: "cargas",
+        scenarioModelingHint: "Modele full vs delta e quantidade de execuções mensais.",
+        addLoad: "Adicionar carga",
+        metricFullVolume: "Volume full / mês",
+        metricDeltaVolume: "Volume delta / mês",
+        metricCredits: "Créditos / mês",
+        colLoad: "Carga",
+        colMode: "Modo",
+        colVolumePerRun: "Volume por execução",
+        colRunsPerMonth: "Execuções / mês",
+        colMonthlyVolume: "Volume mensal",
+        colCreditsPerMonth: "Créditos / mês",
+        remove: "Remover",
+        newLoadName: "Nova carga",
+        riskLow: "Baixo",
+        riskMedium: "Médio",
+        riskHigh: "Alto",
+        primaryDriver: "Principal driver",
+        monthlyFullVolume: "Volume full mensal",
+        monthlyDeltaVolume: "Volume delta mensal",
+        rec1: "Reduzir volume full e mover carga ao padrão delta segue sendo a principal alavanca de economia.",
+        rec2: "Data Transforms pesam mais que ingestão externa. Revise cardinalidade, filtros e materializações.",
+        rec3: "Data Queries é um driver forte. Prefira serving por DMO e menor scan por consulta.",
+        rec4: "O worst case está bem acima do atual. Vale usá-lo como teto orçamentário mensal.",
+        rec5: "O target não economiza contra o atual. Revise volumes, frequência e usage types.",
+        recFallback: "O target mostra melhora razoável. Use export/import JSON para comparar alternativas.",
+        invalidJson: "JSON inválido.",
+        defaultRatesRestored: "Rates padrão restaurados com sucesso.",
+        provideValidUrl: "Informe uma URL válida do PDF.",
+        loadingPdf: "Baixando PDF e processando tabela de usage types...",
+        httpFail: "Falha HTTP",
+        pricingNotFound: "Não foi possível encontrar linhas de pricing no PDF informado.",
+        ratesUpdated: "Rates atualizados a partir do PDF. Usage types encontrados:",
+        loadPdfErrorPrefix: "Erro ao carregar PDF por URL:",
+        corsHint: "Se for CORS, tente abrir este HTML via servidor local.",
+        highExampleLoaded: "Exemplo alto carregado com rates padrão.",
+        optimizedExampleLoaded: "Exemplo otimizado carregado."
+      },
+      en: {
+        pageTitle: "Data Cloud Credit Calculator - Recurring Loads (PDF URL)",
+        heroTitle: "Data Cloud credit calculator - recurring loads",
+        heroDescription: "Version with automatic rate-card ingestion from a Salesforce <strong>PDF URL</strong>. The parser tries to identify <strong>Production</strong> and <strong>Sandbox</strong> values for model usage types.",
+        heroNote: "Note: if the remote server blocks CORS, the browser may block direct PDF reading.",
+        pdfSourceTitle: "Rate card source via PDF",
+        pdfSourceDescription: "Paste the public Salesforce usage-types PDF URL and click load.",
+        languageLabel: "Language",
+        pdfUrlLabel: "PDF URL",
+        pdfUrlPlaceholder: "https://.../New-Nov25-DataCloud-PlatformServices.pdf",
+        loadPdfBtn: "Load rates from URL",
+        resetRatesBtn: "Restore default rates",
+        initialStatus: "Waiting for PDF load.",
+        rateCardTitle: "Rate card",
+        rateCardDescription: "Select the environment to apply Production or Sandbox.",
+        environmentLabel: "Environment",
+        sandbox: "Sandbox",
+        production: "Production",
+        usageType: "Usage type",
+        unit: "Unit",
+        summaryTitle: "Comparative summary",
+        summaryDescription: "Monthly and annual totals by scenario.",
+        scenariosTitle: "Recurring load scenarios",
+        scenariosDescription: "Each row represents one recurring monthly load.",
+        detailTitle: "Breakdown by usage type",
+        detailDescription: "Consolidated cost per usage type in each scenario.",
+        detailDelta: "Delta vs current",
+        diagnosisTitle: "Diagnostics",
+        diagnosisDescription: "Quick read of full/delta mix and cost drivers.",
+        riskWorstLabel: "Worst risk",
+        riskCurrentLabel: "Current risk",
+        riskTargetLabel: "Target risk",
+        exportTitle: "Export / import",
+        exportDescription: "Save scenario assumptions as JSON.",
+        exportBtn: "Export JSON",
+        loadExampleBtn: "Load high example",
+        loadOptimizedBtn: "Load optimized example",
+        importBtn: "Import JSON",
+        scenarioWorst: "Worst case",
+        scenarioCurrent: "Current",
+        scenarioTarget: "Target",
+        loads: "loads",
+        scenarioModelingHint: "Model full vs delta and monthly execution frequency.",
+        addLoad: "Add load",
+        metricFullVolume: "Full volume / month",
+        metricDeltaVolume: "Delta volume / month",
+        metricCredits: "Credits / month",
+        colLoad: "Load",
+        colMode: "Mode",
+        colVolumePerRun: "Volume per run",
+        colRunsPerMonth: "Runs / month",
+        colMonthlyVolume: "Monthly volume",
+        colCreditsPerMonth: "Credits / month",
+        remove: "Remove",
+        newLoadName: "New load",
+        riskLow: "Low",
+        riskMedium: "Medium",
+        riskHigh: "High",
+        primaryDriver: "Top driver",
+        monthlyFullVolume: "Monthly full volume",
+        monthlyDeltaVolume: "Monthly delta volume",
+        rec1: "Reducing full volume and shifting to delta remains the main savings lever.",
+        rec2: "Data Transforms cost more than external ingestion. Review cardinality, filters, and materializations.",
+        rec3: "Data Queries are a strong driver. Prefer DMO serving and lower scan per query.",
+        rec4: "Worst case is well above current. It is useful as a monthly budget ceiling.",
+        rec5: "Target does not save against current. Review volumes, frequency, and usage types.",
+        recFallback: "Target shows reasonable improvement. Use export/import JSON to compare alternatives.",
+        invalidJson: "Invalid JSON.",
+        defaultRatesRestored: "Default rates restored successfully.",
+        provideValidUrl: "Please provide a valid PDF URL.",
+        loadingPdf: "Downloading PDF and processing usage-type pricing...",
+        httpFail: "HTTP failure",
+        pricingNotFound: "Could not find pricing lines in the provided PDF.",
+        ratesUpdated: "Rates updated from PDF. Usage types found:",
+        loadPdfErrorPrefix: "Error loading PDF from URL:",
+        corsHint: "If this is CORS-related, open this HTML through a local server.",
+        highExampleLoaded: "High example loaded with default rates.",
+        optimizedExampleLoaded: "Optimized example loaded."
+      },
+      es: {
+        pageTitle: "Data Cloud Credit Calculator - Cargas recurrentes (URL PDF)",
+        heroTitle: "Calculadora de créditos de Data Cloud - cargas recurrentes",
+        heroDescription: "Versión con ingesta automática de la tabla de precios por <strong>URL de PDF</strong> de Salesforce. El parser intenta identificar los valores de <strong>Production</strong> y <strong>Sandbox</strong> para los usage types del modelo.",
+        heroNote: "Nota: si el servidor remoto bloquea CORS, el navegador puede bloquear la lectura directa del PDF.",
+        pdfSourceTitle: "Fuente del rate card vía PDF",
+        pdfSourceDescription: "Pegue la URL pública del PDF de usage types de Salesforce y haga clic en cargar.",
+        languageLabel: "Idioma",
+        pdfUrlLabel: "URL del PDF",
+        pdfUrlPlaceholder: "https://.../New-Nov25-DataCloud-PlatformServices.pdf",
+        loadPdfBtn: "Cargar rates desde URL",
+        resetRatesBtn: "Restaurar rates por defecto",
+        initialStatus: "Esperando la carga del PDF.",
+        rateCardTitle: "Rate card",
+        rateCardDescription: "Seleccione el entorno para aplicar Production o Sandbox.",
+        environmentLabel: "Entorno",
+        sandbox: "Sandbox",
+        production: "Production",
+        usageType: "Usage type",
+        unit: "Unidad",
+        summaryTitle: "Resumen comparativo",
+        summaryDescription: "Totales mensuales y anuales por escenario.",
+        scenariosTitle: "Escenarios de cargas recurrentes",
+        scenariosDescription: "Cada línea representa una carga recurrente mensual.",
+        detailTitle: "Detalle por usage type",
+        detailDescription: "Costo consolidado por tipo de uso en cada escenario.",
+        detailDelta: "Delta vs actual",
+        diagnosisTitle: "Diagnóstico",
+        diagnosisDescription: "Lectura rápida del mix full/delta y drivers de costo.",
+        riskWorstLabel: "Riesgo worst",
+        riskCurrentLabel: "Riesgo actual",
+        riskTargetLabel: "Riesgo target",
+        exportTitle: "Exportar / importar",
+        exportDescription: "Guarde supuestos de escenarios como JSON.",
+        exportBtn: "Exportar JSON",
+        loadExampleBtn: "Cargar ejemplo alto",
+        loadOptimizedBtn: "Cargar ejemplo optimizado",
+        importBtn: "Importar JSON",
+        scenarioWorst: "Worst case",
+        scenarioCurrent: "Actual",
+        scenarioTarget: "Target",
+        loads: "cargas",
+        scenarioModelingHint: "Modele full vs delta y cantidad de ejecuciones mensuales.",
+        addLoad: "Agregar carga",
+        metricFullVolume: "Volumen full / mes",
+        metricDeltaVolume: "Volumen delta / mes",
+        metricCredits: "Créditos / mes",
+        colLoad: "Carga",
+        colMode: "Modo",
+        colVolumePerRun: "Volumen por ejecución",
+        colRunsPerMonth: "Ejecuciones / mes",
+        colMonthlyVolume: "Volumen mensual",
+        colCreditsPerMonth: "Créditos / mes",
+        remove: "Remover",
+        newLoadName: "Nueva carga",
+        riskLow: "Bajo",
+        riskMedium: "Medio",
+        riskHigh: "Alto",
+        primaryDriver: "Driver principal",
+        monthlyFullVolume: "Volumen full mensual",
+        monthlyDeltaVolume: "Volumen delta mensual",
+        rec1: "Reducir volumen full y mover carga al patrón delta sigue siendo la principal palanca de ahorro.",
+        rec2: "Data Transforms pesan más que la ingesta externa. Revise cardinalidad, filtros y materializaciones.",
+        rec3: "Data Queries es un driver fuerte. Prefiera serving por DMO y menor scan por consulta.",
+        rec4: "El worst case está muy por encima del actual. Conviene usarlo como techo presupuestario mensual.",
+        rec5: "El target no ahorra contra el actual. Revise volúmenes, frecuencia y usage types.",
+        recFallback: "El target muestra mejora razonable. Use export/import JSON para comparar alternativas.",
+        invalidJson: "JSON inválido.",
+        defaultRatesRestored: "Rates por defecto restaurados correctamente.",
+        provideValidUrl: "Ingrese una URL válida del PDF.",
+        loadingPdf: "Descargando PDF y procesando pricing de usage types...",
+        httpFail: "Falla HTTP",
+        pricingNotFound: "No se pudieron encontrar líneas de pricing en el PDF informado.",
+        ratesUpdated: "Rates actualizados desde PDF. Usage types encontrados:",
+        loadPdfErrorPrefix: "Error al cargar PDF por URL:",
+        corsHint: "Si es CORS, abra este HTML usando un servidor local.",
+        highExampleLoaded: "Ejemplo alto cargado con rates por defecto.",
+        optimizedExampleLoaded: "Ejemplo optimizado cargado."
+      }
+    };
+
+    const defaultState = {
+      environment: "sandbox",
+      language: "pt",
+      activeScenario: "current",
+      worst: [
+        { name: "Clientes full externo", usageType: "externalBatch", mode: "full", volume: 40, runs: 20 },
+        { name: "Delta diário externo", usageType: "externalBatch", mode: "delta", volume: 2, runs: 30 },
+        { name: "Transform principal", usageType: "transformBatch", mode: "delta", volume: 55, runs: 30 },
+        { name: "Calculated Insights batch", usageType: "calcInsightsBatch", mode: "delta", volume: 110, runs: 8 },
+        { name: "Query API serving", usageType: "dataQueries", mode: "delta", volume: 1200, runs: 1 },
+        { name: "Segmentação intensiva", usageType: "segmentRows", mode: "delta", volume: 300, runs: 1 }
+      ],
+      current: [
+        { name: "Clientes full externo", usageType: "externalBatch", mode: "full", volume: 25, runs: 12 },
+        { name: "Delta diário externo", usageType: "externalBatch", mode: "delta", volume: 1.2, runs: 30 },
+        { name: "Transform principal", usageType: "transformBatch", mode: "delta", volume: 42, runs: 30 },
+        { name: "Calculated Insights batch", usageType: "calcInsightsBatch", mode: "delta", volume: 30, runs: 6 },
+        { name: "Query API serving", usageType: "dataQueries", mode: "delta", volume: 320, runs: 1 },
+        { name: "Segmentação corrente", usageType: "segmentRows", mode: "delta", volume: 96, runs: 1 }
+      ],
+      target: [
+        { name: "Full refresh controlado", usageType: "externalBatch", mode: "full", volume: 5, runs: 4 },
+        { name: "Delta diário otimizado", usageType: "externalBatch", mode: "delta", volume: 1.4, runs: 30 },
+        { name: "Transform reduzido", usageType: "transformBatch", mode: "delta", volume: 18, runs: 30 },
+        { name: "Calculated Insights afinado", usageType: "calcInsightsBatch", mode: "delta", volume: 12, runs: 4 },
+        { name: "Query API otimizada", usageType: "dataQueries", mode: "delta", volume: 180, runs: 1 },
+        { name: "Segmentação otimizada", usageType: "segmentRows", mode: "delta", volume: 72, runs: 1 }
+      ]
+    };
+
+    let state = JSON.parse(JSON.stringify(defaultState));
+
+    function getLocale() {
+      if (state.language === "en") return "en-US";
+      if (state.language === "es") return "es-ES";
+      return "pt-BR";
+    }
+
+    function t(key) {
+      return (i18n[state.language] && i18n[state.language][key]) || i18n.pt[key] || key;
+    }
+
+    function fmt(num) {
+      return Number(num || 0).toLocaleString(getLocale(), {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function setPdfStatus(message, type = "info") {
+      const statusEl = document.getElementById("pdfStatus");
+      statusEl.textContent = message;
+      statusEl.className = "status";
+      if (type === "ok") statusEl.classList.add("ok");
+      if (type === "error") statusEl.classList.add("error");
+    }
+
+    function applyStaticTranslations() {
+      document.title = t("pageTitle");
+      document.documentElement.lang = state.language === "en" ? "en" : state.language === "es" ? "es" : "pt-BR";
+
+      document.getElementById("heroTitle").textContent = t("heroTitle");
+      document.getElementById("heroDescription").innerHTML = t("heroDescription");
+      document.getElementById("heroNote").textContent = t("heroNote");
+
+      document.getElementById("pdfSourceTitle").textContent = t("pdfSourceTitle");
+      document.getElementById("pdfSourceDescription").textContent = t("pdfSourceDescription");
+      document.getElementById("languageLabel").textContent = t("languageLabel");
+      document.getElementById("pdfUrlLabel").textContent = t("pdfUrlLabel");
+      document.getElementById("pdfUrl").placeholder = t("pdfUrlPlaceholder");
+      document.getElementById("loadPdfBtn").textContent = t("loadPdfBtn");
+      document.getElementById("resetRatesBtn").textContent = t("resetRatesBtn");
+
+      document.getElementById("rateCardTitle").textContent = t("rateCardTitle");
+      document.getElementById("rateCardDescription").textContent = t("rateCardDescription");
+      document.getElementById("environmentLabel").textContent = t("environmentLabel");
+      document.getElementById("environmentOptionSandbox").textContent = t("sandbox");
+      document.getElementById("environmentOptionProduction").textContent = t("production");
+      document.getElementById("rateHeaderUsageType").textContent = t("usageType");
+      document.getElementById("rateHeaderUnit").textContent = t("unit");
+      document.getElementById("rateHeaderProduction").textContent = t("production");
+      document.getElementById("rateHeaderSandbox").textContent = t("sandbox");
+
+      document.getElementById("summaryTitle").textContent = t("summaryTitle");
+      document.getElementById("summaryDescription").textContent = t("summaryDescription");
+
+      document.getElementById("scenariosTitle").textContent = t("scenariosTitle");
+      document.getElementById("scenariosDescription").textContent = t("scenariosDescription");
+
+      document.getElementById("detailTitle").textContent = t("detailTitle");
+      document.getElementById("detailDescription").textContent = t("detailDescription");
+      document.getElementById("detailHeaderUsageType").textContent = t("usageType");
+      document.getElementById("detailHeaderWorst").textContent = t("scenarioWorst");
+      document.getElementById("detailHeaderCurrent").textContent = t("scenarioCurrent");
+      document.getElementById("detailHeaderTarget").textContent = t("scenarioTarget");
+      document.getElementById("detailHeaderDelta").textContent = t("detailDelta");
+
+      document.getElementById("diagnosisTitle").textContent = t("diagnosisTitle");
+      document.getElementById("diagnosisDescription").textContent = t("diagnosisDescription");
+      document.getElementById("riskWorstLabel").textContent = t("riskWorstLabel");
+      document.getElementById("riskCurrentLabel").textContent = t("riskCurrentLabel");
+      document.getElementById("riskTargetLabel").textContent = t("riskTargetLabel");
+
+      document.getElementById("exportTitle").textContent = t("exportTitle");
+      document.getElementById("exportDescription").textContent = t("exportDescription");
+      document.getElementById("exportBtn").textContent = t("exportBtn");
+      document.getElementById("loadExampleBtn").textContent = t("loadExampleBtn");
+      document.getElementById("loadOptimizedBtn").textContent = t("loadOptimizedBtn");
+      document.getElementById("jsonLabel").textContent = "JSON";
+      document.getElementById("importBtn").textContent = t("importBtn");
+    }
+
+    function normalizeText(value) {
+      return String(value || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9.\- ]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function parseNumberToken(token) {
+      const clean = token.replace(/[^\d,.\-]/g, "");
+      if (!clean) return null;
+
+      if (clean.includes(".") && clean.includes(",")) {
+        if (clean.lastIndexOf(",") > clean.lastIndexOf(".")) {
+          const normalized = clean.replace(/\./g, "").replace(",", ".");
+          const parsed = Number(normalized);
+          return Number.isFinite(parsed) ? parsed : null;
+        }
+        const normalized = clean.replace(/,/g, "");
+        const parsed = Number(normalized);
+        return Number.isFinite(parsed) ? parsed : null;
+      }
+
+      if (clean.includes(",")) {
+        const parts = clean.split(",");
+        const last = parts[parts.length - 1] || "";
+        if (last.length <= 2) {
+          const normalized = clean.replace(/\./g, "").replace(",", ".");
+          const parsed = Number(normalized);
+          return Number.isFinite(parsed) ? parsed : null;
+        }
+        const normalized = clean.replace(/,/g, "");
+        const parsed = Number(normalized);
+        return Number.isFinite(parsed) ? parsed : null;
+      }
+
+      const parsed = Number(clean);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    function extractNumberValues(text) {
+      // Avoid numeric chunks attached to words (e.g. "Nov25").
+      const tokens = text.match(/(?<![A-Za-z])-?\d[\d.,]*(?![A-Za-z])/g) || [];
+      return tokens
+        .map(parseNumberToken)
+        .filter((num) => Number.isFinite(num) && num >= 0 && num <= 100000000);
+    }
+
+    function scoreRatePair(production, sandbox, usage) {
+      if (production < 0 || sandbox < 0) {
+        return Number.POSITIVE_INFINITY;
+      }
+      if (production === 0 && sandbox === 0) {
+        return 0;
+      }
+      if (sandbox > production * 1.05) {
+        return Number.POSITIVE_INFINITY;
+      }
+
+      const defaultProd = usage.rates.production;
+      const defaultSandbox = usage.rates.sandbox;
+
+      // Guardrail: avoid obvious out-of-range matches for known usage types.
+      if (defaultProd > 0) {
+        const minProd = defaultProd * 0.1;
+        const maxProd = defaultProd * 3;
+        if (production < minProd || production > maxProd) {
+          return Number.POSITIVE_INFINITY;
+        }
+      }
+      if (defaultSandbox > 0) {
+        const minSandbox = defaultSandbox * 0.1;
+        const maxSandbox = defaultSandbox * 3;
+        if (sandbox < minSandbox || sandbox > maxSandbox) {
+          return Number.POSITIVE_INFINITY;
+        }
+      }
+
+      const ratio = production > 0 ? (sandbox / production) : 0;
+      let score = 0;
+
+      // Most entries in this PDF keep Sandbox close to 80% of Production.
+      score += Math.abs(ratio - 0.8) * 120;
+
+      // Keep close to known reference rates as tie-breaker.
+      if (defaultProd > 0) {
+        score += Math.abs(production - defaultProd) / defaultProd * 25;
+      } else {
+        score += Math.abs(production) * 0.001;
+      }
+      if (defaultSandbox > 0) {
+        score += Math.abs(sandbox - defaultSandbox) / defaultSandbox * 25;
+      } else {
+        score += Math.abs(sandbox) * 0.001;
+      }
+
+      // Penalize very large outliers (typically wrong matches).
+      if (production > 1000000 || sandbox > 1000000) {
+        score += 5000;
+      }
+      return score;
+    }
+
+    function pickBestRatePair(values, usage) {
+      if (!values || values.length < 2) {
+        return null;
+      }
+
+      let best = null;
+      for (let idx = 0; idx < values.length - 1; idx += 1) {
+        const production = values[idx];
+        const sandbox = values[idx + 1];
+        const score = scoreRatePair(production, sandbox, usage);
+        if (!Number.isFinite(score)) {
+          continue;
+        }
+        if (!best || score < best.score) {
+          best = { production, sandbox, score };
+        }
+      }
+      return best ? { production: best.production, sandbox: best.sandbox } : null;
+    }
+
+    function buildPageLines(textContent) {
+      const rowsByY = new Map();
+      textContent.items.forEach((item) => {
+        const x = item.transform[4];
+        const y = item.transform[5];
+        // Group close Y coordinates as one visual row.
+        const yKey = Math.round(y / 2) * 2;
+        if (!rowsByY.has(yKey)) {
+          rowsByY.set(yKey, []);
+        }
+        rowsByY.get(yKey).push({ x, str: item.str || "" });
+      });
+
+      const sortedYKeys = [...rowsByY.keys()].sort((a, b) => b - a);
+      const lines = [];
+      sortedYKeys.forEach((yKey) => {
+        const entries = rowsByY.get(yKey).sort((a, b) => a.x - b.x);
+        const chunks = [];
+        let prevX = null;
+        entries.forEach((entry) => {
+          const text = String(entry.str || "").trim();
+          if (!text) {
+            return;
+          }
+          if (prevX !== null && entry.x - prevX > 24) {
+            chunks.push(" ");
+          }
+          chunks.push(text);
+          prevX = entry.x + (text.length * 4.2);
+        });
+        const line = chunks.join(" ").replace(/\s+/g, " ").trim();
+        if (line) {
+          lines.push(line);
+        }
+      });
+      return lines;
+    }
+
+    async function extractPdfLines(arrayBuffer) {
+      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      const pdf = await loadingTask.promise;
+      const lines = [];
+
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum += 1) {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        lines.push(...buildPageLines(textContent));
+      }
+      return lines;
+    }
+
+    function extractRatesByUsage(lines) {
+      const normalizedLines = lines.map((line) => normalizeText(line));
+      const found = {};
+
+      usageTypes.forEach((usage) => {
+        let result = null;
+        for (let idx = 0; idx < normalizedLines.length; idx += 1) {
+          const normalizedLine = normalizedLines[idx];
+          const matchesAlias = usage.aliases.some((alias) => normalizedLine.includes(alias));
+          if (!matchesAlias) {
+            continue;
+          }
+          const candidateText = [
+            lines[idx] || "",
+            lines[idx + 1] || "",
+            lines[idx + 2] || ""
+          ].join(" ");
+          const values = extractNumberValues(candidateText);
+          const parsed = pickBestRatePair(values, usage);
+          if (parsed) {
+            result = parsed;
+            break;
+          }
+        }
+
+        if (result) {
+          found[usage.key] = result;
+        }
+      });
+
+      return found;
+    }
+
+    function applyRateOverrides(overrides) {
+      usageTypes = usageTypes.map((usage) => {
+        const rate = overrides[usage.key];
+        if (!rate) {
+          return usage;
+        }
+        return {
+          ...usage,
+          rates: {
+            production: rate.production,
+            sandbox: rate.sandbox
+          }
+        };
+      });
+    }
+
+    function restoreDefaultRates() {
+      usageTypes = JSON.parse(JSON.stringify(baseUsageTypes));
+      render();
+      setPdfStatus(t("defaultRatesRestored"), "ok");
+    }
+
+    async function loadRatesFromPdfUrl() {
+      const pdfUrl = document.getElementById("pdfUrl").value.trim();
+      if (!pdfUrl) {
+        setPdfStatus(t("provideValidUrl"), "error");
+        return;
+      }
+
+      setPdfStatus(t("loadingPdf"));
+      try {
+        const response = await fetch(pdfUrl);
+        if (!response.ok) {
+          throw new Error(`${t("httpFail")} ${response.status}`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        const pdfLines = await extractPdfLines(arrayBuffer);
+        const overrides = extractRatesByUsage(pdfLines);
+        const matched = Object.keys(overrides).length;
+
+        if (!matched) {
+          throw new Error(t("pricingNotFound"));
+        }
+
+        applyRateOverrides(overrides);
+        render();
+        setPdfStatus(`${t("ratesUpdated")} ${matched}/${usageTypes.length}.`, "ok");
+      } catch (error) {
+        setPdfStatus(`${t("loadPdfErrorPrefix")} ${error.message}. ${t("corsHint")}`, "error");
+      }
+    }
+
+    function getUsage(usageKey) {
+      return usageTypes.find((u) => u.key === usageKey);
+    }
+
+    function getRate(usageKey) {
+      const usage = getUsage(usageKey);
+      return usage ? usage.rates[state.environment] : 0;
+    }
+
+    function rowMonthlyVolume(row) {
+      return (Number(row.volume || 0) * Number(row.runs || 0));
+    }
+
+    function rowMonthlyCredits(row) {
+      return rowMonthlyVolume(row) * getRate(row.usageType);
+    }
+
+    function total(obj) {
+      return Object.values(obj).reduce((acc, val) => acc + val, 0);
+    }
+
+    function summarizeScenarioRows(rows) {
+      const summary = {
+        fullVolume: 0,
+        deltaVolume: 0,
+        credits: 0
+      };
+      rows.forEach((row) => {
+        const monthlyVolume = rowMonthlyVolume(row);
+        const monthlyCredits = rowMonthlyCredits(row);
+        if (row.mode === "full") {
+          summary.fullVolume += monthlyVolume;
+        } else {
+          summary.deltaVolume += monthlyVolume;
+        }
+        summary.credits += monthlyCredits;
+      });
+      return summary;
+    }
+
+    function buildUsageBreakdown(rows) {
+      const breakdown = {};
+      usageTypes.forEach((usage) => {
+        breakdown[usage.key] = 0;
+      });
+      rows.forEach((row) => {
+        if (breakdown[row.usageType] !== undefined) {
+          breakdown[row.usageType] += rowMonthlyCredits(row);
+        }
+      });
+      return breakdown;
+    }
+
+    function renderRateCard() {
+      const tbody = document.getElementById("rateCardBody");
+      tbody.innerHTML = "";
+      usageTypes.forEach((usage) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${usage.label}</td>
+          <td>${usage.unit}</td>
+          <td>${fmt(usage.rates.production)}</td>
+          <td>${fmt(usage.rates.sandbox)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addRow(scenarioKey) {
+      state[scenarioKey].push({
+        name: t("newLoadName"),
+        usageType: "externalBatch",
+        mode: "delta",
+        volume: 1,
+        runs: 30
+      });
+      render();
+    }
+
+    function removeRow(scenarioKey, idx) {
+      state[scenarioKey].splice(idx, 1);
+      render();
+    }
+
+    function updateRow(scenarioKey, idx, field, value) {
+      const row = state[scenarioKey][idx];
+      if (!row) {
+        return;
+      }
+      if (field === "volume" || field === "runs") {
+        row[field] = Number(value || 0);
+      } else {
+        row[field] = value;
+      }
+      refreshComputedOnly();
+    }
+
+    function renderScenarioTabs() {
+      const tabs = document.getElementById("scenarioTabs");
+      tabs.innerHTML = scenarioOrder.map((meta) => `
+        <button
+          class="scenario-tab ${state.activeScenario === meta.key ? "active" : ""}"
+          data-scenario="${meta.key}"
+          type="button"
+        >
+          <span class="scenario-tab-bullet"></span>
+          <span>${t(meta.titleKey)}</span>
+        </button>
+      `).join("");
+
+      tabs.querySelectorAll("[data-scenario]").forEach((btn) => {
+        btn.onclick = () => {
+          state.activeScenario = btn.dataset.scenario;
+          render();
+        };
+      });
+    }
+
+    function renderScenarioPanel(meta) {
+      const container = document.getElementById(meta.containerId);
+      const summary = summarizeScenarioRows(state[meta.key]);
+      const pillClass = meta.key === "worst" ? "worst" : meta.key === "current" ? "current" : "target";
+      const scenarioTitle = t(meta.titleKey);
+      container.className = "scenario-panel" + (state.activeScenario === meta.key ? "" : " hidden");
+      container.innerHTML = `
+        <div class="section-title">
+          <div>
+            <h3>${scenarioTitle}</h3>
+            <div class="scenario-header-meta">
+              <span class="pill ${pillClass}">${scenarioTitle}</span>
+              <span class="pill">${state[meta.key].length} ${t("loads")}</span>
+              <span class="pill">${state.environment}</span>
+            </div>
+            <p class="muted">${t("scenarioModelingHint")}</p>
+          </div>
+          <button data-add="${meta.key}">${t("addLoad")}</button>
+        </div>
+        <div class="cards">
+          <div class="card kpi ${pillClass}">
+            <div class="label">${t("metricFullVolume")}</div>
+            <div class="value" data-summary="${meta.key}-full">${fmt(summary.fullVolume)}</div>
+          </div>
+          <div class="card kpi ${pillClass}">
+            <div class="label">${t("metricDeltaVolume")}</div>
+            <div class="value" data-summary="${meta.key}-delta">${fmt(summary.deltaVolume)}</div>
+          </div>
+          <div class="card kpi ${pillClass}">
+            <div class="label">${t("metricCredits")}</div>
+            <div class="value" data-summary="${meta.key}-credits">${fmt(summary.credits)}</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="scenario-table">
+            <thead>
+              <tr>
+                <th>${t("colLoad")}</th>
+                <th>${t("usageType")}</th>
+                <th>${t("colMode")}</th>
+                <th>${t("colVolumePerRun")}</th>
+                <th>${t("colRunsPerMonth")}</th>
+                <th>${t("colMonthlyVolume")}</th>
+                <th>${t("colCreditsPerMonth")}</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${state[meta.key].map((row, idx) => {
+                const usageOptions = usageTypes.map((usage) => `
+                  <option value="${usage.key}" ${usage.key === row.usageType ? "selected" : ""}>${usage.label}</option>
+                `).join("");
+                return `
+                  <tr data-row-key="${meta.key}-${idx}">
+                    <td><input data-scenario="${meta.key}" data-index="${idx}" data-field="name" value="${row.name}" /></td>
+                    <td>
+                      <select data-scenario="${meta.key}" data-index="${idx}" data-field="usageType">
+                        ${usageOptions}
+                      </select>
+                    </td>
+                    <td>
+                      <select data-scenario="${meta.key}" data-index="${idx}" data-field="mode">
+                        <option value="full" ${row.mode === "full" ? "selected" : ""}>full</option>
+                        <option value="delta" ${row.mode === "delta" ? "selected" : ""}>delta</option>
+                      </select>
+                    </td>
+                    <td><input type="number" min="0" step="0.01" data-scenario="${meta.key}" data-index="${idx}" data-field="volume" value="${row.volume}" /></td>
+                    <td><input type="number" min="0" step="1" data-scenario="${meta.key}" data-index="${idx}" data-field="runs" value="${row.runs}" /></td>
+                    <td class="number" data-row-volume="${meta.key}-${idx}">${fmt(rowMonthlyVolume(row))}</td>
+                    <td class="number" data-row-credits="${meta.key}-${idx}">${fmt(rowMonthlyCredits(row))}</td>
+                    <td><button data-remove="${meta.key}" data-index="${idx}">${t("remove")}</button></td>
+                  </tr>
+                `;
+              }).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderRisk(targetId, rows) {
+      const summary = summarizeScenarioRows(rows);
+      let badge = `<span class="badge good">${t("riskLow")}</span>`;
+      if (summary.credits >= 100000) {
+        badge = `<span class="badge bad">${t("riskHigh")}</span>`;
+      } else if (summary.credits >= 25000) {
+        badge = `<span class="badge warn">${t("riskMedium")}</span>`;
+      }
+      const largest = [...rows].sort((a, b) => rowMonthlyCredits(b) - rowMonthlyCredits(a))[0];
+      const largestLabel = largest ? largest.name : "N/A";
+      document.getElementById(targetId).innerHTML = `
+        ${badge}
+        <div class="small" style="margin-top: 8px;">${t("primaryDriver")}: <strong>${largestLabel}</strong></div>
+        <div class="small">${t("monthlyFullVolume")}: <strong>${fmt(summary.fullVolume)}</strong></div>
+        <div class="small">${t("monthlyDeltaVolume")}: <strong>${fmt(summary.deltaVolume)}</strong></div>
+      `;
+    }
+
+    function renderRecommendations() {
+      const ul = document.getElementById("recommendations");
+      ul.innerHTML = "";
+      const items = [];
+      const worstSummary = summarizeScenarioRows(state.worst);
+      const currentSummary = summarizeScenarioRows(state.current);
+      const targetSummary = summarizeScenarioRows(state.target);
+
+      if (currentSummary.fullVolume > targetSummary.fullVolume) {
+        items.push(t("rec1"));
+      }
+      const currentBreakdown = buildUsageBreakdown(state.current);
+      const currentTransform = currentBreakdown.transformBatch + currentBreakdown.transformStreaming;
+      const currentExternal = currentBreakdown.externalBatch + currentBreakdown.externalStreaming;
+      if (currentTransform > currentExternal) {
+        items.push(t("rec2"));
+      }
+      if (currentBreakdown.dataQueries > currentBreakdown.segmentRows) {
+        items.push(t("rec3"));
+      }
+      if (worstSummary.credits > currentSummary.credits * 1.5) {
+        items.push(t("rec4"));
+      }
+      if (targetSummary.credits >= currentSummary.credits) {
+        items.push(t("rec5"));
+      }
+      if (!items.length) {
+        items.push(t("recFallback"));
+      }
+
+      items.forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        ul.appendChild(li);
+      });
+    }
+
+    function renderSummary() {
+      const worstBreakdown = buildUsageBreakdown(state.worst);
+      const currentBreakdown = buildUsageBreakdown(state.current);
+      const targetBreakdown = buildUsageBreakdown(state.target);
+      const worstTotal = total(worstBreakdown);
+      const currentTotal = total(currentBreakdown);
+      const targetTotal = total(targetBreakdown);
+      const ratioTargetCurrent = currentTotal > 0 ? (targetTotal / currentTotal) : 0;
+
+      document.getElementById("worstTotal").textContent = fmt(worstTotal);
+      document.getElementById("currentTotal").textContent = fmt(currentTotal);
+      document.getElementById("targetTotal").textContent = fmt(targetTotal);
+      document.getElementById("deltaVsCurrent").textContent = fmt(currentTotal - targetTotal);
+      document.getElementById("deltaVsWorst").textContent = fmt(worstTotal - targetTotal);
+      document.getElementById("worstYear").textContent = fmt(worstTotal * 12);
+      document.getElementById("currentYear").textContent = fmt(currentTotal * 12);
+      document.getElementById("targetYear").textContent = fmt(targetTotal * 12);
+      document.getElementById("ratioTargetCurrent").textContent = ratioTargetCurrent.toLocaleString(getLocale(), {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }) + "x";
+
+      const deltaCurrentEl = document.getElementById("deltaVsCurrent");
+      const deltaWorstEl = document.getElementById("deltaVsWorst");
+      deltaCurrentEl.className = "value " + ((currentTotal - targetTotal) > 0 ? "delta-negative" : (currentTotal - targetTotal) < 0 ? "delta-positive" : "delta-neutral");
+      deltaWorstEl.className = "value " + ((worstTotal - targetTotal) > 0 ? "delta-negative" : (worstTotal - targetTotal) < 0 ? "delta-positive" : "delta-neutral");
+
+      const tbody = document.getElementById("breakdownBody");
+      tbody.innerHTML = "";
+      usageTypes.forEach((usage) => {
+        const diffCurrent = targetBreakdown[usage.key] - currentBreakdown[usage.key];
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${usage.label}</td>
+          <td>${fmt(worstBreakdown[usage.key])}</td>
+          <td>${fmt(currentBreakdown[usage.key])}</td>
+          <td>${fmt(targetBreakdown[usage.key])}</td>
+          <td class="${diffCurrent > 0 ? "delta-positive" : diffCurrent < 0 ? "delta-negative" : "delta-neutral"}">${fmt(diffCurrent)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function refreshScenarioPanelComputed(scenarioKey) {
+      const meta = scenarioOrder.find((item) => item.key === scenarioKey);
+      if (!meta) return;
+      const container = document.getElementById(meta.containerId);
+      if (!container) return;
+
+      const summary = summarizeScenarioRows(state[scenarioKey]);
+      const fullEl = container.querySelector(`[data-summary="${scenarioKey}-full"]`);
+      const deltaEl = container.querySelector(`[data-summary="${scenarioKey}-delta"]`);
+      const creditsEl = container.querySelector(`[data-summary="${scenarioKey}-credits"]`);
+      if (fullEl) fullEl.textContent = fmt(summary.fullVolume);
+      if (deltaEl) deltaEl.textContent = fmt(summary.deltaVolume);
+      if (creditsEl) creditsEl.textContent = fmt(summary.credits);
+
+      state[scenarioKey].forEach((row, idx) => {
+        const rowKey = `${scenarioKey}-${idx}`;
+        const volumeEl = container.querySelector(`[data-row-volume="${rowKey}"]`);
+        const creditsRowEl = container.querySelector(`[data-row-credits="${rowKey}"]`);
+        if (volumeEl) volumeEl.textContent = fmt(rowMonthlyVolume(row));
+        if (creditsRowEl) creditsRowEl.textContent = fmt(rowMonthlyCredits(row));
+      });
+    }
+
+    function refreshComputedOnly() {
+      scenarioOrder.forEach((meta) => refreshScenarioPanelComputed(meta.key));
+      renderSummary();
+      renderRisk("worstRisk", state.worst);
+      renderRisk("currentRisk", state.current);
+      renderRisk("targetRisk", state.target);
+      renderRecommendations();
+    }
+
+    function render() {
+      applyStaticTranslations();
+      renderRateCard();
+      renderScenarioTabs();
+      scenarioOrder.forEach(renderScenarioPanel);
+      renderSummary();
+      renderRisk("worstRisk", state.worst);
+      renderRisk("currentRisk", state.current);
+      renderRisk("targetRisk", state.target);
+      renderRecommendations();
+
+      document.querySelectorAll("[data-add]").forEach((btn) => {
+        btn.onclick = () => addRow(btn.dataset.add);
+      });
+      document.querySelectorAll("[data-remove]").forEach((btn) => {
+        btn.onclick = () => removeRow(btn.dataset.remove, Number(btn.dataset.index));
+      });
+      document.querySelectorAll("[data-scenario][data-index][data-field]").forEach((el) => {
+        const handler = () => updateRow(el.dataset.scenario, Number(el.dataset.index), el.dataset.field, el.value);
+        el.oninput = handler;
+        el.onchange = handler;
+      });
+    }
+
+    function serializeState() {
+      return JSON.stringify(
+        {
+          ...state,
+          usageTypes
+        },
+        null,
+        2
+      );
+    }
+
+    function applyState(newState) {
+      state = JSON.parse(JSON.stringify(newState));
+      if (Array.isArray(newState.usageTypes)) {
+        usageTypes = newState.usageTypes.map((item) => ({
+          ...item,
+          aliases: Array.isArray(item.aliases) && item.aliases.length ? item.aliases : [normalizeText(item.label)]
+        }));
+      }
+      state.language = state.language || "pt";
+      document.getElementById("environment").value = state.environment || "sandbox";
+      document.getElementById("language").value = state.language;
+      state.activeScenario = state.activeScenario || "current";
+      render();
+    }
+
+    document.getElementById("environment").addEventListener("change", (e) => {
+      state.environment = e.target.value;
+      render();
+    });
+
+    document.getElementById("language").addEventListener("change", (e) => {
+      state.language = e.target.value;
+      render();
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      document.getElementById("jsonBox").value = serializeState();
+    });
+
+    document.getElementById("importBtn").addEventListener("click", () => {
+      try {
+        const parsed = JSON.parse(document.getElementById("jsonBox").value);
+        applyState(parsed);
+      } catch (error) {
+        alert(t("invalidJson"));
+      }
+    });
+
+    document.getElementById("loadExampleBtn").addEventListener("click", () => {
+      usageTypes = JSON.parse(JSON.stringify(baseUsageTypes));
+      applyState({
+        ...defaultState,
+        language: state.language || "pt"
+      });
+      setPdfStatus(t("highExampleLoaded"), "ok");
+    });
+
+    document.getElementById("loadOptimizedBtn").addEventListener("click", () => {
+      applyState({
+        environment: "sandbox",
+        language: state.language || "pt",
+        worst: defaultState.worst,
+        current: defaultState.current,
+        target: [
+          { name: "Full refresh controlado", usageType: "externalBatch", mode: "full", volume: 4, runs: 4 },
+          { name: "Delta diário otimizado", usageType: "externalBatch", mode: "delta", volume: 1.4, runs: 30 },
+          { name: "Transform reduzido", usageType: "transformBatch", mode: "delta", volume: 18, runs: 20 },
+          { name: "Calculated Insights otimizado", usageType: "calcInsightsBatch", mode: "delta", volume: 8, runs: 4 },
+          { name: "Query API otimizada", usageType: "dataQueries", mode: "delta", volume: 140, runs: 1 },
+          { name: "Segmentação otimizada", usageType: "segmentRows", mode: "delta", volume: 60, runs: 1 }
+        ]
+      });
+      setPdfStatus(t("optimizedExampleLoaded"), "ok");
+    });
+
+    document.getElementById("loadPdfBtn").addEventListener("click", loadRatesFromPdfUrl);
+    document.getElementById("resetRatesBtn").addEventListener("click", restoreDefaultRates);
+
+    document.getElementById("language").value = state.language;
+    setPdfStatus(t("initialStatus"));
+    render();
+  </script>
+</body>
+</html>
